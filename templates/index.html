@@ -1,30 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Item Manager</title>
+    <title>Horse Blanket Tracker</title>
     <style>
-        body { font-family: Arial; margin: 40px; }
-        li { margin: 8px 0; }
-        a { color: red; text-decoration: none; margin-left: 10px; }
+        body { font-family: sans-serif; margin: 40px; }
+        .horse-card { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
+        .blanket-list { margin-left: 20px; font-size: 0.9em; }
+        .form-section { background: #f4f4f4; padding: 15px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-<h1>Item Manager</h1>
+    <h2>Add a New Horse</h2>
+    <form method="POST" class="form-section">
+        <input type="text" name="horse_name" placeholder="Horse Name" required>
+        <button type="submit">Add Horse</button>
+    </form>
 
-<form method="POST">
-    <input type="text" name="name" placeholder="New item" required>
-    <button type="submit">Add</button>
-</form>
+    <hr>
 
-<ul>
-    {% for item in items %}
-        <li>
-            {{ item.name }}
-            <a href="/delete/{{ item.id }}">[Remove]</a>
-        </li>
+    <h2>Horses & Their Blankets</h2>
+    {% for item in horse_data %}
+        <div class="horse-card">
+            <h3>
+                {{ item.horse.name }} 
+                <a href="{{ url_for('delete', horse_id=item.horse.id) }}" style="color:red; font-size: 0.6em;">[Delete Horse]</a>
+            </h3>
+
+            <div class="blanket-list">
+                <h4>Blankets:</h4>
+                {% if item.blankets %}
+                    <ul>
+                    {% for blanket in item.blankets %}
+                        <li>
+                            <strong>{{ blanket.name }}</strong> 
+                            ({{ blanket.min_temp }}° to {{ blanket.max_temp }}°)
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No blankets added yet.</p>
+                {% endif %}
+
+                <form action="{{ url_for('add_blanket', horse_id=item.horse.id) }}" method="POST">
+                    <input type="text" name="blanket_name" placeholder="Blanket Name (e.g. Heavy Turnout)" required>
+                    <input type="number" name="min_temp" placeholder="Min Temp" size="5">
+                    <input type="number" name="max_temp" placeholder="Max Temp" size="5">
+                    <button type="submit">Add Blanket</button>
+                </form>
+            </div>
+        </div>
     {% endfor %}
-</ul>
 
 </body>
 </html>
