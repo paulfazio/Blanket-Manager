@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Item Manager</title>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        li { margin: 8px 0; }
+        a { color: red; text-decoration: none; margin-left: 10px; }
+    </style>
+</head>
+<body>
+
+<h1>Item Manager</h1>
+
+<form method="POST">
+    <input type="text" name="name" placeholder="New item" required>
+    <button type="submit">Add</button>
+</form>
+
+<ul>
+    {% for item in items %}
+        <li>
+            {{ item.name }}
+            <a href="/delete/{{ item.id }}">[Remove]</a>
+        </li>
+    {% endfor %}
+</ul>
+
+</body>
+</html>
