@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Horse Care Hub</title>
+    <title>Barn Manager</title>
     <style>
         body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; }
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #fdfdfd; }
+        .flex-row { display: flex; flex-direction: row; align-content: stretch; }
+        .flex-column { display: flex; flex-direction: column; align-content: stretch; }
+        .card { border: 1px solid #ddd; padding: 15px; margin: 15px; border-radius: 8px; background: #fdfdfd; }
         .inventory-item { display: flex; align-items: center; justify-content: space-between; margin: 10px 0; }
         .btn { padding: 5px 10px; text-decoration: none; background: #eee; border: 1px solid #ccc; color: black; border-radius: 4px; }
         .alert { color: #d9534f; font-weight: bold; }
@@ -14,52 +15,27 @@
     </style>
 </head>
 <body>
-    <h1>Horse Care Dashboard</h1>
-
-    <div class="dashboard-grid">
-        <div class="card">
-            <h3>Forecast & Blanketing</h3>
+    <div class="flex-row">
+        <div style="flex-grow: 1">
+            <h1>Barn Manager</h1>
+        </div>
+        <div style="flex-grow: 1">
+            <a href="{{ url_for('configure_settings') }}">Settings</a>
+        </div>
+    </div>
+    <div class="flex-row">
+        <div class="card" style="flex-grow: 1">
+            <h3>Forecast</h3>
             {% if not settings.address %}
-                <p><a href="{{ url_for('configure_address') }}">Set address</a> for weather updates.</p>
+                <p><a href="{{ url_for('configure_settings') }}">Set address</a> for weather updates.</p>
             {% else %}
                 {% if weather %}
-                    <p>Chill Low: <strong>{{ "%.1f"|format(weather.min_chill) }}°F</strong></p>
+                    <p>Wind Chill Low: <strong>{{ "%.1f"|format(weather.min_chill) }}°F</strong></p>
                     {% if weather.total_precip > 0.05 %}<p class="alert">Precipitation Expected</p>{% endif %}
                 {% endif %}
-                
-                <table>
-                    {% for rec in recs %}
-                    <tr>
-                        <td>{{ rec.name }}</td>
-                        <td><strong>{{ rec.recommendation }}</strong></td>
-                    </tr>
-                    {% endfor %}
-                </table>
             {% endif %}
         </div>
-
-        {% for data in horse_data %}
-        <div class="card">
-            <h3>{{ data.info.name }}</h3>
-            <a href="{{ url_for('view_history', horse_id=data.info.id) }}">View Med History</a>
-            
-            <h4>Today's Meds:</h4>
-            <ul>
-                {% for med in data.meds %}
-                <li>
-                    {{ med.schedule_time }} - {{ med.med_name }} ({{ med.dose }})
-                    {% if med.id in data.given_ids %}
-                        ✅ <em>Given</em>
-                    {% else %}
-                        <a href="{{ url_for('log_medication', med_id=med.id, horse_id=data.info.id) }}">Mark as Done</a>
-                    {% endif %}
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-        {% endfor %}
-
-        <div class="card">
+        <div class="card" style="flex-grow: 1">
             <h3>Barn Inventory</h3>
             <form action="{{ url_for('set_inventory') }}" method="POST" id="inventoryForm">
                 
@@ -85,13 +61,35 @@
             <p style="font-size: 0.8em; color: #666; margin-top: 15px;">
                 <em>Inventory updates automatically on selection.</em>
             </p>
-        </div>             
-    </div>
+        </div> 
+    </div>    
+    <div class="flex-column">
+        {% for data in horse_data %}
+        <div class="card">
+            <h3>{{ data.info.name }}</h3><a href="{{ url_for('delete_horse', horse_id=data.info.id) }}">[Delete]</a>
+            <hr>
+            <a href="{{ url_for('view_history', horse_id=data.info.id) }}">View Med History</a>
+            
+            <h4>Today's Meds:</h4>
+            <ul>
+                {% for med in data.meds %}
+                <li>
+                    {{ med.schedule_time }} - {{ med.med_name }} ({{ med.dose }})
+                    {% if med.id in data.given_ids %}
+                        ✅ <em>Given</em>
+                    {% else %}
+                        <a href="{{ url_for('log_medication', med_id=med.id, horse_id=data.info.id) }}">Mark as Done</a>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            <h4>Blanket:</h4>{{ data.blanket }}
+        </div>
+        {% endfor %}
 
-    <hr>
-    <p>
-        <a href="{{ url_for('configure_horses') }}">Configure Horses</a> | 
-        <a href="{{ url_for('configure_address') }}">Configure Address</a>
-    </p>
+        <p style="text-align:center;">
+            <a href="{{ url_for('configure_horses') }}">Add Horse</a>
+        </p>            
+    </div>
 </body>
 </html>

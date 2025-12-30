@@ -63,7 +63,8 @@ def main_page():
         horse_data.append({
             'info': horse,
             'meds': meds,
-            'given_ids': given_ids
+            'given_ids': given_ids,
+            'blanket': rec
         })
 
     conn.close()
@@ -182,8 +183,8 @@ def configure_horses():
     conn.close()
     return render_template("configure_horses.html", horse_data=horse_data)
 
-@app.route("/configure_address", methods=["GET", "POST"])
-def configure_address():
+@app.route("/configure_settings", methods=["GET", "POST"])
+def configure_settings():
     conn = get_db_connection()
     if request.method == "POST":
         new_address = request.form["address"]
@@ -195,7 +196,7 @@ def configure_address():
     addr_row = conn.execute("SELECT address FROM settings WHERE id = 1").fetchone()
     current_address = addr_row['address'] if addr_row else ""
     conn.close()
-    return render_template("configure_address.html", current_address=current_address)
+    return render_template("configure_settings.html", current_address=current_address)
 
 @app.route("/add_blanket/<int:horse_id>", methods=["POST"])
 def add_blanket(horse_id):
@@ -215,7 +216,7 @@ def delete_horse(horse_id):
     conn.execute("DELETE FROM med_log WHERE horse_id = ?", (horse_id,))
     conn.commit()
     conn.close()
-    return redirect(url_for("configure_horses"))
+    return redirect(url_for("main_page"))
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
